@@ -1,11 +1,14 @@
 package dev.newsletterss.api.controller;
 
+import java.util.HashMap;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import dev.newsletterss.api.dto.MemberRequestDTO;
 import dev.newsletterss.api.service.JwtTokenUtilImpl;
 import dev.newsletterss.api.service.MemberService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -41,6 +44,17 @@ public class MemberController {
 		//String refreshToken = jwtTokenUtilImpl.createJwtRefreshToken(memberRequestDto);
 		//response.setHeader("accesstoken", accToken);
 		//response.setHeader("refreshtoekn", refreshToken);
+		
+		System.out.println("ASDFASDFASDFASDFASDF");
+	}
+	
+	@PostMapping("/auth/login")
+	public ResponseEntity<?> authlogin(HttpServletResponse response) {
+		System.out.println("authlogin");
+		HashMap<String, Object> result = new HashMap<>();
+		result.put("accessToken", response.getHeader("accessToken"));
+		result.put("refreshToken", response.getHeader("refreshToken"));
+		return new ResponseEntity<>(result, HttpStatus.OK);
 	}
 	
 	@PostMapping("/user/auth")
