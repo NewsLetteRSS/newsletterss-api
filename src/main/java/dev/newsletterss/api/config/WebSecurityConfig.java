@@ -49,7 +49,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 				"/user/register").permitAll()
 		//anyRequest().permitAll().and()
 		// all other requests need to be authenticated
-		.antMatchers("/auth/login", "/newsletterssAPI/**").authenticated()
+		.antMatchers("/auth/loginSuccess", "/newsletterssAPI/**").authenticated()
 		.and()
 		.addFilter(new jwtAuthenticationFilter(authenticationManager(), getApplicationContext()));
 		//.and()

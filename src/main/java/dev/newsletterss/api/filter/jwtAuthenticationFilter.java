@@ -13,12 +13,14 @@ import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.util.StringUtils;
 
@@ -79,7 +81,6 @@ public class jwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
 	@Override
 	public void setAuthenticationSuccessHandler(AuthenticationSuccessHandler successHandler) {
-
 		super.setAuthenticationSuccessHandler(successHandler);
 	}
 
@@ -100,6 +101,10 @@ public class jwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 				String refToken = jwtTokenUtilImpl.createJwtRefreshToken(authenticatedUser.getUsername());
 				response.addHeader("accessToken", accToken);
 				response.addHeader("refreshToken", refToken);
+				SecurityContext context = SecurityContextHolder.createEmptyContext();
+			    context.setAuthentication(authResult);
+			    SecurityContextHolder.setContext(context);
+			    chain.doFilter(request, response);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
