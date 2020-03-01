@@ -1,9 +1,12 @@
 spring:
   datasource:
     driver-class-name: org.mariadb.jdbc.Driver
-    url: jdbc:mysql://${DB_HOST}:${DB_PORT}/${DB_NAME}?useSSL=false&characterEncoding=UTF-8&serverTimezone=UTC
-    username: ${DB_USER}
-    password: ${DB_PASS}
+#    url: jdbc:mysql://${DB_HOST}:${DB_PORT}/${DB_NAME}?useSSL=false&characterEncoding=UTF-8&serverTimezone=UTC
+    url: jdbc:mysql://203.229.102.139:13306/newsletterss?useSSL=false&characterEncoding=UTF-8&serverTimezone=UTC
+#    username: ${DB_USER}
+#    password: ${DB_PASS}
+    username: newsletterss
+    password: nlrss2020!
   jpa:
     generate-ddl: true
     show-sql: false
