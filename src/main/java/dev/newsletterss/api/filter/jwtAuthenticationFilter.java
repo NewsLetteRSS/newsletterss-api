@@ -7,6 +7,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -39,15 +40,17 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 public class jwtAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
-	@Autowired
+
 	private JwtTokenUtilImpl jwtTokenUtilImpl;
 
-	private PasswordEncoder passwordEncoder;
+
 	private final AuthenticationManager authenticationManager;
 
-	public jwtAuthenticationFilter(AuthenticationManager authenticationManager) {
+	public jwtAuthenticationFilter(AuthenticationManager authenticationManager, ApplicationContext ctx) {
 		this.authenticationManager = authenticationManager;
 		setFilterProcessesUrl("/auth/**");
+
+		jwtTokenUtilImpl = ctx.getBean(JwtTokenUtilImpl.class);
 	}
 	@Override
 	public Authentication attemptAuthentication(HttpServletRequest httpServletRequest,
@@ -88,22 +91,18 @@ public class jwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 				.map(GrantedAuthority::getAuthority)
 				.collect(Collectors.toList());*/
 		User authenticatedUser = ((User)authResult.getPrincipal());
-		//System.out.println(authenticatedUser.getPassword());
-		ReadableRequestWrapper wrapper = new ReadableRequestWrapper(request);
-		String rawPw = wrapper.getParameter("password");
-		System.out.println("db pw  :" + authenticatedUser);
-		System.out.println("rawpw :" + rawPw);
-		if(passwordEncoder.matches(rawPw, (String)authResult.getCredentials())){
+			String authusernm = authenticatedUser.getUsername();
+			System.out.println(authusernm);
 			String accToken = null;
+			log.info("sss"+(jwtTokenUtilImpl == null));
 			try {
-				accToken = jwtTokenUtilImpl.createJwtToken(authResult.getPrincipal().toString());
-				String refToken = jwtTokenUtilImpl.createJwtRefreshToken(authResult.getPrincipal().toString());
+				accToken = jwtTokenUtilImpl.createJwtToken(authusernm);
+				String refToken = jwtTokenUtilImpl.createJwtRefreshToken(authenticatedUser.getUsername());
 				response.addHeader("accessToken", accToken);
 				response.addHeader("refreshToken", refToken);
 			} catch (Exception e) {
 				e.printStackTrace();
 			}
-		}
 	}
 
 	public class ReadableRequestWrapper extends HttpServletRequestWrapper { // 상속
