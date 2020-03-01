@@ -26,53 +26,52 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 @Service
 public class MemberService implements UserDetailsService {
-	
+
 	private final MemberRepository memberRepository;
+	private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+
 	/*
-	* 회원가입
-	* 
-	* @ param MemberRequestDTO memberRequestDto entity 데이터를 담은 객체
-	* @ return Member Entity
-	*/
+	 * 회원가입
+	 *
+	 * @ param MemberRequestDTO memberRequestDto entity 데이터를 담은 객체
+	 * @ return Member Entity
+	 */
 	@Transactional
 	public Member joinMember(MemberRequestDTO memberRequestDto) {
 
-		BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-		String username =memberRequestDto.toEntity().getUsername();
+		String username = memberRequestDto.toEntity().getUsername();
 		String encodedPassword = passwordEncoder.encode(memberRequestDto.toEntity().getPassword());
 		LocalDateTime currentTime = LocalDateTime.now();
 		Member newMember = Member.builder()
-								 .username(username)
-								 .password(encodedPassword)
-								 .email(memberRequestDto.toEntity().getEmail())
-								 .regdate(currentTime)
-								 .userrole("MEMBER")
-								 .build();
+				.username(username)
+				.password(encodedPassword)
+				.email(memberRequestDto.toEntity().getEmail())
+				.regdate(currentTime)
+				.userrole("MEMBER")
+				.build();
 		return memberRepository.save(newMember);
 	}
-	
+
 	@Transactional
 	public void loginMember(MemberRequestDTO memberRequestDto) {
-		
+
 	}
-	
+
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-
 		Optional<Member> memberEntityWrapper = memberRepository.findByUsername(username);
 		Member memberEntity = memberEntityWrapper.get();
-        List<GrantedAuthority> authorities = new ArrayList<>();
+		List<GrantedAuthority> authorities = new ArrayList<>();
 
-        if (memberEntity.getUsername().equals("admin")) {
-            authorities.add(new SimpleGrantedAuthority("ADMIN"));
-        } else {
-            authorities.add(new SimpleGrantedAuthority("MEMBER"));
+		if (memberEntity.getUsername().equals("admin")) {
+			authorities.add(new SimpleGrantedAuthority("ADMIN"));
+		} else {
+			authorities.add(new SimpleGrantedAuthority("MEMBER"));
+		}
 
-        }
-        User user = new User(memberEntity.getUsername(), memberEntity.getPassword(), authorities);
-        System.out.println(user.getPassword());
-       return user;
-    }
+		User user = new User(memberEntity.getUsername(), memberEntity.getPassword(), authorities);
+		System.out.println("paw : " + user.getPassword());
+		return user;
+	}
 
 }
-	

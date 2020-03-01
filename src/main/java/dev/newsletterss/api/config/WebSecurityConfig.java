@@ -30,7 +30,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 	 * bcypt 알고리즘을 이용하여 데이터를 암호화한다
 	 * @ return PasswordEncoder BCryptPasswordEncoder
 	 */
-	@Bean
+	@Autowired
 	public PasswordEncoder passwordEncoder() {
 		return new BCryptPasswordEncoder();
 	}
@@ -51,7 +51,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 		// all other requests need to be authenticated
 		.antMatchers("/auth/login", "/newsletterssAPI/**").authenticated()
 		.and()
-		.addFilter(new jwtAuthenticationFilter(authenticationManager()));
+		.addFilter(new jwtAuthenticationFilter(authenticationManager(), getApplicationContext()));
 		//.and()
 		// make sure we use stateless session; session won't be used to
 		// store user's state.

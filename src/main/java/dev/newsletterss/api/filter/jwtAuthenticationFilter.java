@@ -1,18 +1,22 @@
 package dev.newsletterss.api.filter;
 
 import dev.newsletterss.api.service.JwtTokenUtilImpl;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -34,40 +38,48 @@ import java.util.stream.Collectors;
  * @version 1.0
  * (2020.02.11) 이상일, 최초 작성
  */
+@Slf4j
 public class jwtAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
-	@Autowired
+
 	private JwtTokenUtilImpl jwtTokenUtilImpl;
+
 
 	private final AuthenticationManager authenticationManager;
 
-	public jwtAuthenticationFilter(AuthenticationManager authenticationManager) {
+	public jwtAuthenticationFilter(AuthenticationManager authenticationManager, ApplicationContext ctx) {
 		this.authenticationManager = authenticationManager;
 		setFilterProcessesUrl("/auth/**");
+
+		jwtTokenUtilImpl = ctx.getBean(JwtTokenUtilImpl.class);
 	}
 	@Override
 	public Authentication attemptAuthentication(HttpServletRequest httpServletRequest,
 												HttpServletResponse httpServletResponse) throws AuthenticationException {
 		ReadableRequestWrapper wrapper = new ReadableRequestWrapper(httpServletRequest);
 		String username = wrapper.getParameter("username");
-		BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-		String encodedPassword = passwordEncoder.encode(wrapper.getParameter("password"));
-		System.out.println(encodedPassword);
-
+		String rawPw = wrapper.getParameter("password");
 		UsernamePasswordAuthenticationToken authenticationToken =
-				new UsernamePasswordAuthenticationToken(username, encodedPassword, Collections.emptyList());
+					new UsernamePasswordAuthenticationToken(username, rawPw);
 
 		return authenticationManager.authenticate(authenticationToken);
 	}
 
 	@Override
+	protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) throws IOException, ServletException {
+    // System.out.println("?? : " +failed.ge);
+
+		super.unsuccessfulAuthentication(request, response, failed);
+	}
+
+	@Override
 	public void setAuthenticationFailureHandler(AuthenticationFailureHandler failureHandler) {
-		System.out.println("failure");
+
 		super.setAuthenticationFailureHandler(failureHandler);
 	}
 
 	@Override
 	public void setAuthenticationSuccessHandler(AuthenticationSuccessHandler successHandler) {
-		System.out.println("????");
+
 		super.setAuthenticationSuccessHandler(successHandler);
 	}
 
@@ -78,19 +90,19 @@ public class jwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 				.stream()
 				.map(GrantedAuthority::getAuthority)
 				.collect(Collectors.toList());*/
-
-		System.out.println(SecurityContextHolder.getContext().getAuthentication());
 		User authenticatedUser = ((User)authResult.getPrincipal());
-		System.out.println("?");
-		try {
-			String accToken = jwtTokenUtilImpl.createJwtToken(authenticatedUser.getUsername());
-			System.out.println(accToken);
-			String refToken = jwtTokenUtilImpl.createJwtRefreshToken(authenticatedUser.getUsername());
-			response.addHeader("accessToken", accToken);
-			response.addHeader("refreshToken", refToken);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+			String authusernm = authenticatedUser.getUsername();
+			System.out.println(authusernm);
+			String accToken = null;
+			log.info("sss"+(jwtTokenUtilImpl == null));
+			try {
+				accToken = jwtTokenUtilImpl.createJwtToken(authusernm);
+				String refToken = jwtTokenUtilImpl.createJwtRefreshToken(authenticatedUser.getUsername());
+				response.addHeader("accessToken", accToken);
+				response.addHeader("refreshToken", refToken);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 	}
 
 	public class ReadableRequestWrapper extends HttpServletRequestWrapper { // 상속
