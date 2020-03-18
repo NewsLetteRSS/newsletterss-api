@@ -1,6 +1,7 @@
 package dev.newsletterss.api.filter;
 
 import dev.newsletterss.api.service.JwtTokenUtilImpl;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.json.simple.JSONArray;
@@ -11,6 +12,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContext;
@@ -42,40 +44,39 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 public class jwtAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
-
+	@Autowired
 	private JwtTokenUtilImpl jwtTokenUtilImpl;
-
 
 	private final AuthenticationManager authenticationManager;
 
 	public jwtAuthenticationFilter(AuthenticationManager authenticationManager, ApplicationContext ctx) {
 		this.authenticationManager = authenticationManager;
 		setFilterProcessesUrl("/auth/**");
-
 		jwtTokenUtilImpl = ctx.getBean(JwtTokenUtilImpl.class);
 	}
+	/*public jwtAuthenticationFilter(AuthenticationManager authenticationManager,  JwtTokenUtilImpl jwtTokenUtilImpl) {
+	this.authenticationManager = authenticationManager;
+	this.jwtTokenUtilImpl = jwtTokenUtilImpl;
+	setFilterProcessesUrl("/auth/**");
+
+}*/
+
 	@Override
 	public Authentication attemptAuthentication(HttpServletRequest httpServletRequest,
 												HttpServletResponse httpServletResponse) throws AuthenticationException {
 		ReadableRequestWrapper wrapper = new ReadableRequestWrapper(httpServletRequest);
 		String username = wrapper.getParameter("username");
 		String rawPw = wrapper.getParameter("password");
-		UsernamePasswordAuthenticationToken authenticationToken =
-					new UsernamePasswordAuthenticationToken(username, rawPw);
-
+		UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(username, rawPw);
 		return authenticationManager.authenticate(authenticationToken);
 	}
-
 	@Override
 	protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) throws IOException, ServletException {
-    // System.out.println("?? : " +failed.ge);
-
 		super.unsuccessfulAuthentication(request, response, failed);
 	}
 
 	@Override
 	public void setAuthenticationFailureHandler(AuthenticationFailureHandler failureHandler) {
-
 		super.setAuthenticationFailureHandler(failureHandler);
 	}
 
@@ -84,6 +85,7 @@ public class jwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 		super.setAuthenticationSuccessHandler(successHandler);
 	}
 
+	@SneakyThrows
 	@Override
 	protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authResult) throws IOException, ServletException {
 	/*	User autnenticatedUser = ((User)authResult.getPrincipal());
@@ -93,11 +95,11 @@ public class jwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 				.collect(Collectors.toList());*/
 		User authenticatedUser = ((User)authResult.getPrincipal());
 			String authusernm = authenticatedUser.getUsername();
-			System.out.println(authusernm);
-			String accToken = null;
-			log.info("sss"+(jwtTokenUtilImpl == null));
-			try {
-				accToken = jwtTokenUtilImpl.createJwtToken(authusernm);
+
+
+
+
+				String accToken = jwtTokenUtilImpl.createJwtToken(authusernm);
 				String refToken = jwtTokenUtilImpl.createJwtRefreshToken(authenticatedUser.getUsername());
 				response.addHeader("accessToken", accToken);
 				response.addHeader("refreshToken", refToken);
@@ -105,9 +107,7 @@ public class jwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 			    context.setAuthentication(authResult);
 			    SecurityContextHolder.setContext(context);
 			    chain.doFilter(request, response);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+
 	}
 
 	public class ReadableRequestWrapper extends HttpServletRequestWrapper { // 상속

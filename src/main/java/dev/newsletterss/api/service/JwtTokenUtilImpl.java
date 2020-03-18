@@ -44,7 +44,6 @@ public class JwtTokenUtilImpl implements JwtTokenUtil {
 		//private claim
 		payloadMap.put("username", userid);
 
-
 		String accessJws = Jwts.builder()
 				.setHeaderParam("typ", "JWT")// alg 는 자동으로 생성
 				.setIssuer("newsletterss")//토큰 발급자
@@ -66,8 +65,6 @@ public class JwtTokenUtilImpl implements JwtTokenUtil {
         Map<String, Object> payloadMap = new HashMap<>();
         //private claim
         payloadMap.put("username", userid);
-
-
 
         String refreshJws = Jwts.builder()
                 .setHeaderParam("typ", "JWT")// alg 는 자동으로 생성

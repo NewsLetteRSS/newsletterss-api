@@ -68,9 +68,7 @@ public class MemberService implements UserDetailsService {
 		} else {
 			authorities.add(new SimpleGrantedAuthority("MEMBER"));
 		}
-
 		User user = new User(memberEntity.getUsername(), memberEntity.getPassword(), authorities);
-		System.out.println("paw : " + user.getPassword());
 		return user;
 	}
 

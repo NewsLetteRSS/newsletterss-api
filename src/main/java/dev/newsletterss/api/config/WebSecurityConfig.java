@@ -11,9 +11,13 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import lombok.AllArgsConstructor;
+import org.springframework.security.web.access.AccessDeniedHandler;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
 /**
  * Security Configuration
  * @author 이상일
@@ -26,6 +30,13 @@ import lombok.AllArgsConstructor;
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 	@Autowired
 	private MemberService memberService;
+
+	@Bean
+	public AccessDeniedHandler customAccessDeniedHandler(){
+		return new CustomAccessDeniedHandler();
+	}
+	@Autowired
+	private JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
 	/*
 	 * bcypt 알고리즘을 이용하여 데이터를 암호화한다
 	 * @ return PasswordEncoder BCryptPasswordEncoder
@@ -34,7 +45,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 	public PasswordEncoder passwordEncoder() {
 		return new BCryptPasswordEncoder();
 	}
-	
+
 	@Override
 	public void configure(WebSecurity web) throws Exception {
 		// TODO Auto-generated method stub
@@ -44,20 +55,17 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
 		http.csrf().disable()
-		// dont authenticate this particular request
-		.authorizeRequests().antMatchers("/user/auth",
-				"/user/register").permitAll()
-		//anyRequest().permitAll().and()
-		// all other requests need to be authenticated
-		.antMatchers("/auth/loginSuccess", "/newsletterssAPI/**").authenticated()
+		// 아래 경로는 어떤 사용자건 접근이 가능하다
+		.authorizeRequests().antMatchers("/main", "/user").permitAll()
+		// 아래의 경로는 인증을 받아야 접근 가능하다.
+		.antMatchers("/auth/login", "/newsletterssAPI/auth/**", "/user/**").authenticated()
 		.and()
-		.addFilter(new jwtAuthenticationFilter(authenticationManager(), getApplicationContext()));
-		//.and()
-		// make sure we use stateless session; session won't be used to
-		// store user's state.
-		//.exceptionHandling().authenticationEntryPoint().and().sessionManagement()
-		//.sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-
+		.addFilter(new jwtAuthenticationFilter(authenticationManager(), getApplicationContext()))
+		//인증 관련 에러는 AuthenticationEntryPoint로, 인가 관련 에러는 customAccessDeniedHandler로 보내겠다
+		.exceptionHandling().accessDeniedHandler(customAccessDeniedHandler()).authenticationEntryPoint(jwtAuthenticationEntryPoint)
+		.and()
+		//세션을 사용하지 않겠다
+		.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 	}
 	// 사용자의 유저네임과 패스워드가 맞는지 검증
 	@Override
