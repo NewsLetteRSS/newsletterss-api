@@ -1,5 +1,6 @@
 package dev.newsletterss.api.filter;
 
+import dev.newsletterss.api.config.CustomAuthenticationFailureHandler;
 import dev.newsletterss.api.service.JwtTokenUtilImpl;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -9,10 +10,7 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.AuthenticationProvider;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.authentication.*;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -50,8 +48,12 @@ public class jwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
 	private final AuthenticationManager authenticationManager;
 
+
+
 	public jwtAuthenticationFilter(AuthenticationManager authenticationManager, ApplicationContext ctx) {
 		this.authenticationManager = authenticationManager;
+		//Exception 처리를 위해 CustomFailureHandler
+		this.setAuthenticationFailureHandler(new CustomAuthenticationFailureHandler());
 		setFilterProcessesUrl("/auth/**");
 		jwtTokenUtilImpl = ctx.getBean(JwtTokenUtilImpl.class);
 	}
@@ -73,18 +75,7 @@ public class jwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 	}
 	@Override
 	protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) throws IOException, ServletException {
-		log.warn(String.valueOf(failed instanceof BadCredentialsException));
-		super.unsuccessfulAuthentication(request, response, failed);
-	}
-
-	@Override
-	public void setAuthenticationFailureHandler(AuthenticationFailureHandler failureHandler) {
-		super.setAuthenticationFailureHandler(failureHandler);
-	}
-
-	@Override
-	public void setAuthenticationSuccessHandler(AuthenticationSuccessHandler successHandler) {
-		super.setAuthenticationSuccessHandler(successHandler);
+		getFailureHandler().onAuthenticationFailure(request, response, failed);
 	}
 
 	@SneakyThrows
@@ -97,9 +88,6 @@ public class jwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 				.collect(Collectors.toList());*/
 		User authenticatedUser = ((User)authResult.getPrincipal());
 			String authusernm = authenticatedUser.getUsername();
-
-
-
 
 				String accToken = jwtTokenUtilImpl.createJwtToken(authusernm);
 				String refToken = jwtTokenUtilImpl.createJwtRefreshToken(authenticatedUser.getUsername());
