@@ -28,6 +28,6 @@ public class CustomAccessDeniedHandler implements AccessDeniedHandler {
             System.out.print("인증객체없다");
         }
         accessDeniedException.getCause();
-        response.sendError(HttpServletResponse.SC_FORBIDDEN, "잘못된 접근입니다");
+        response.sendError(HttpServletResponse.SC_FORBIDDEN, "허가되지 않은 접근입니다.");
     }
 }

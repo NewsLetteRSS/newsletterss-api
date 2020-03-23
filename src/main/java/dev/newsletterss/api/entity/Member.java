@@ -24,7 +24,7 @@ import lombok.NoArgsConstructor;
 public class Member {
 
 	@Id
-	@Column(length = 100)
+	@Column(name = "userName",length = 100)
 	private String username;
 
 	/*@Column(name = "username")
@@ -33,9 +33,9 @@ public class Member {
 	private String password;
 	@Column(name = "email")
 	private String email;
-	@Column(name = "regdate")
+	@Column(name = "regDate")
 	private LocalDateTime regdate;
-	@Column(name = "userrole")
+	@Column(name = "userRole")
 	private String userrole;
 	
 	@Builder

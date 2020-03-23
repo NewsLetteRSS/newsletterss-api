@@ -33,7 +33,7 @@ public class MemberController {
 	@Autowired
     private JwtTokenUtilImpl jwtTokenUtilImpl;
 	
-	@PostMapping("/user/register")
+	@PostMapping("/user")
 	public ResponseEntity<?> saveUser(@RequestBody MemberRequestDTO memberRequestDto) throws Exception {
 		return ResponseEntity.ok(memberService.joinMember(memberRequestDto));
 	}
