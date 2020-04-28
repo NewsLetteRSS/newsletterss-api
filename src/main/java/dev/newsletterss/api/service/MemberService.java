@@ -4,6 +4,7 @@ package dev.newsletterss.api.service;
  * @author 이상일
  * @version 1.0
  * (2020.01.29) 이상일, 최초 작성
+ * (2020.04.28) 이상일, refreshToken DB 저장 메소드 추가
  */
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -12,7 +13,10 @@ import java.util.Optional;
 import javax.transaction.Transactional;
 import dev.newsletterss.api.dto.MemberRequestDTO;
 import dev.newsletterss.api.entity.Member;
+import dev.newsletterss.api.entity.TokenStorage;
 import dev.newsletterss.api.repository.MemberRepository;
+import dev.newsletterss.api.repository.TokenStorageRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
@@ -28,7 +32,11 @@ import org.springframework.stereotype.Service;
 public class MemberService implements UserDetailsService {
 
 	private final MemberRepository memberRepository;
+	private final TokenStorageRepository tokenStorageRepository;
 	private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+
+	@Autowired
+	JwtTokenUtilImpl jwtTokenUtilImpl;
 
 	/*
 	 * 회원가입
@@ -51,12 +59,22 @@ public class MemberService implements UserDetailsService {
 				.build();
 		return memberRepository.save(newMember);
 	}
-
-	@Transactional
-	public void loginMember(MemberRequestDTO memberRequestDto) {
+	/*
+	 * 발급받은 refreshToken DB에 저장
+	 *
+	 * @ param String refreshToken 로그인 후 발급받은 refreshToken
+	 */
+	public void saveRefreshTokenInMaria(String refreshToken) throws Exception{
+		String parseUserName = jwtTokenUtilImpl.getClaimsFromJwtToken(refreshToken).get("username").toString();
+		String parseUserRole = jwtTokenUtilImpl.getClaimsFromJwtToken(refreshToken).get("userrole").toString();
+		TokenStorage tokenStorage = TokenStorage.builder()
+						.username(parseUserName)
+						.userrole(parseUserRole)
+						.tokenvalue(refreshToken)
+						.build();
+		tokenStorageRepository.save(tokenStorage);
 
 	}
-
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 		Optional<Member> memberEntityWrapper = memberRepository.findByUsername(username);

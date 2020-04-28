@@ -43,26 +43,19 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 public class jwtAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
+	private final AuthenticationManager authenticationManager;
+
 	@Autowired
 	private JwtTokenUtilImpl jwtTokenUtilImpl;
 
-	private final AuthenticationManager authenticationManager;
-
-
-
 	public jwtAuthenticationFilter(AuthenticationManager authenticationManager, ApplicationContext ctx) {
 		this.authenticationManager = authenticationManager;
-		//Exception 처리를 위해 CustomFailureHandler
+		//Exception 처리를 위해 CustomFailureHandler 등록
 		this.setAuthenticationFailureHandler(new CustomAuthenticationFailureHandler());
-		setFilterProcessesUrl("/auth/**");
+		setFilterProcessesUrl("/newsletterssAPI/auth/login");
 		jwtTokenUtilImpl = ctx.getBean(JwtTokenUtilImpl.class);
 	}
-	/*public jwtAuthenticationFilter(AuthenticationManager authenticationManager,  JwtTokenUtilImpl jwtTokenUtilImpl) {
-	this.authenticationManager = authenticationManager;
-	this.jwtTokenUtilImpl = jwtTokenUtilImpl;
-	setFilterProcessesUrl("/auth/**");
 
-}*/
 
 	@Override
 	public Authentication attemptAuthentication(HttpServletRequest httpServletRequest,
@@ -70,33 +63,33 @@ public class jwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 		ReadableRequestWrapper wrapper = new ReadableRequestWrapper(httpServletRequest);
 		String username = wrapper.getParameter("username");
 		String rawPw = wrapper.getParameter("password");
+		//log.info("authentication");
 		UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(username, rawPw);
 		return authenticationManager.authenticate(authenticationToken);
 	}
 	@Override
 	protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response, AuthenticationException failed) throws IOException, ServletException {
+		//인증 실패시 등록된 CustomAuthenticationFailureHandler를 호출한다
 		getFailureHandler().onAuthenticationFailure(request, response, failed);
 	}
 
 	@SneakyThrows
 	@Override
 	protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authResult) throws IOException, ServletException {
-	/*	User autnenticatedUser = ((User)authResult.getPrincipal());
-		ArrayList userrole = (ArrayList) autnenticatedUser.getAuthorities()
-				.stream()
-				.map(GrantedAuthority::getAuthority)
-				.collect(Collectors.toList());*/
 		User authenticatedUser = ((User)authResult.getPrincipal());
-			String authusernm = authenticatedUser.getUsername();
+		String authUserName = authenticatedUser.getUsername();
+		String authUserRole = authenticatedUser.getAuthorities().toString();
+		System.out.println("role ::" + authUserRole);
+		String accToken = jwtTokenUtilImpl.createJwtToken(authUserName, authUserRole);
+		String refToken = jwtTokenUtilImpl.createJwtRefreshToken(authUserName, authUserRole);
 
-				String accToken = jwtTokenUtilImpl.createJwtToken(authusernm);
-				String refToken = jwtTokenUtilImpl.createJwtRefreshToken(authenticatedUser.getUsername());
-				response.addHeader("accessToken", accToken);
-				response.addHeader("refreshToken", refToken);
-				SecurityContext context = SecurityContextHolder.createEmptyContext();
-			    context.setAuthentication(authResult);
-			    SecurityContextHolder.setContext(context);
-			    chain.doFilter(request, response);
+		response.addHeader("accessToken", accToken);
+		response.addHeader("refreshToken", refToken);
+
+		SecurityContext context = SecurityContextHolder.createEmptyContext();
+		context.setAuthentication(authResult);
+		SecurityContextHolder.setContext(context);
+		chain.doFilter(request, response);
 
 	}
 

@@ -1,6 +1,7 @@
 package dev.newsletterss.api.config;
 
 import dev.newsletterss.api.filter.jwtAuthenticationFilter;
+import dev.newsletterss.api.filter.jwtAuthorizationFilter;
 import dev.newsletterss.api.service.MemberService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -17,6 +18,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import lombok.AllArgsConstructor;
 import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+import java.util.concurrent.atomic.AtomicIntegerArray;
 
 /**
  * Security Configuration
@@ -56,13 +59,15 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 	protected void configure(HttpSecurity http) throws Exception {
 		http.csrf().disable()
 		// 아래 경로는 어떤 사용자건 접근이 가능하다
-		.authorizeRequests().antMatchers("/main", "/user").permitAll()
-		// 아래의 경로는 인증을 받아야 접근 가능하다.
-		.antMatchers("/auth/login", "/newsletterssAPI/auth/**", "/user/**").authenticated()
+		.authorizeRequests().antMatchers("/main", "/newsletterssAPI/user", "/login").permitAll()
+		// 아래의 경로는 인증을 받아야 접근 가능하다
+		.antMatchers(  "newsletterssAPI/auth/*").authenticated()
 		.and()
 		.addFilter(new jwtAuthenticationFilter(authenticationManager(), getApplicationContext()))
+		.addFilter(new jwtAuthorizationFilter(authenticationManager(), getApplicationContext()))
 		//인증 관련 에러는 AuthenticationEntryPoint로, 인가 관련 에러는 customAccessDeniedHandler로 보내겠다
-		.exceptionHandling().accessDeniedHandler(customAccessDeniedHandler()).authenticationEntryPoint(jwtAuthenticationEntryPoint)
+		.exceptionHandling().accessDeniedHandler(customAccessDeniedHandler())
+		.authenticationEntryPoint(jwtAuthenticationEntryPoint)
 		.and()
 		//세션을 사용하지 않겠다
 		.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);

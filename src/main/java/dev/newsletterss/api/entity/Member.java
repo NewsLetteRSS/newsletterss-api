@@ -26,9 +26,6 @@ public class Member {
 	@Id
 	@Column(name = "userName",length = 100)
 	private String username;
-
-	/*@Column(name = "username")
-	private String username;*/
 	@Column(name = "password")
 	private String password;
 	@Column(name = "email")
