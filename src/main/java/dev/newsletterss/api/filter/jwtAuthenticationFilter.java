@@ -2,6 +2,7 @@ package dev.newsletterss.api.filter;
 
 import dev.newsletterss.api.config.CustomAuthenticationFailureHandler;
 import dev.newsletterss.api.service.JwtTokenUtilImpl;
+import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
@@ -42,15 +43,15 @@ import java.util.stream.Collectors;
  * (2020.02.11) 이상일, 최초 작성
  */
 @Slf4j
+@RequiredArgsConstructor
 public class jwtAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 	private final AuthenticationManager authenticationManager;
 
-	@Autowired
-	private JwtTokenUtilImpl jwtTokenUtilImpl;
+	private final JwtTokenUtilImpl jwtTokenUtilImpl;
 
 	public jwtAuthenticationFilter(AuthenticationManager authenticationManager, ApplicationContext ctx) {
 		this.authenticationManager = authenticationManager;
-		//Exception 처리를 위해 CustomFailureHandler 등록
+		//인증처리 실패 처리를 위한 CustomAuthenticationFailureHandler 등록
 		this.setAuthenticationFailureHandler(new CustomAuthenticationFailureHandler());
 		setFilterProcessesUrl("/newsletterssAPI/auth/login");
 		jwtTokenUtilImpl = ctx.getBean(JwtTokenUtilImpl.class);

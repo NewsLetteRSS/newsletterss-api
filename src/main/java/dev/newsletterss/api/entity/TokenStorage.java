@@ -28,13 +28,13 @@ public class TokenStorage {
     @Column(name = "userRole")
     private String userrole;
     @Column(name = "token")
-    private String tokenvalue;
+    private String token;
 
     @Builder
-    public TokenStorage(String username, String userrole, String tokenvalue) {
+    public TokenStorage(String username, String userrole, String token) {
         this.username = username;
         this.userrole = userrole;
-        this.tokenvalue = tokenvalue;
+        this.token = token;
     }
 
 }

@@ -1,5 +1,6 @@
 package dev.newsletterss.api.service;
 
+import dev.newsletterss.api.config.CustomAccessDeniedHandler;
 import dev.newsletterss.api.config.JwtTokenUtil;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
@@ -87,10 +88,10 @@ public class JwtTokenUtilImpl implements JwtTokenUtil {
 	 * @ exception 예외사항
 	 * @return
 	 */
-    public boolean verifyToken(String jwtString){
+    public boolean verifyToken(String jwtString) throws Exception {
     	boolean verificationToken;
     	try {
-    		Jwts.parserBuilder().setSigningKey(secretKey).build().parseClaimsJws(jwtString).getBody().getExpiration();
+			getClaimsFromJwtToken(jwtString);
 			verificationToken = true;
 		}catch (MalformedJwtException e){ // 잘못된 claim 구조
 			log.info(e.getMessage());
@@ -104,28 +105,50 @@ public class JwtTokenUtilImpl implements JwtTokenUtil {
 		}catch(UnsupportedJwtException e){// 형식이 맞지않는 토큰
 			log.info(e.getMessage());
 			verificationToken = false;
+		} catch (ExpiredJwtException e) {
+			verificationToken = isJwtTokenExpired(jwtString);
 		}
-    	return verificationToken;
+		return verificationToken;
 	}
 	/**
-	 * user가 보낸 token의 유효기간 검사
+	 * user가 보낸 token의 만료기간 검사
 	 *
 	 * @ param String jwtString 사용자가 보낸 token value
 	 * @ return 검증값
 	 * @ exception 예외사항
 	 * @return
 	 */
-	public boolean isJwtTokenExpired(String jwtString){
-		boolean tokenExp;
-		try{
-			Jwts.parserBuilder().setSigningKey(secretKey).build().parseClaimsJws(jwtString).getBody().getExpiration();
-			tokenExp = true;
-		} catch(ExpiredJwtException e){
-			log.info(e.getMessage());
-			tokenExp = false;
-		}
-		return tokenExp;
+	public boolean isJwtTokenExpired(String jwtString) throws Exception{
+		final Date expTime = getClaimsFromJwtToken(jwtString).getExpiration();
+		return expTime.before(new Date());
 	}
+
+	/**
+	 * user가 보낸 token의 username 반환
+	 *
+	 * @ param String jwtString 사용자가 보낸 token value
+	 * @ return username
+	 * @ exception 예외사항
+	 * @return
+	 */
+	public String getUsernameFromToken(String jwtString) throws Exception{
+		String username = getClaimsFromJwtToken(jwtString).get("username").toString();
+		return username;
+	}
+
+	/**
+	 * user가 보낸 token의 userrole 반환
+	 *
+	 * @ param String jwtString 사용자가 보낸 token value
+	 * @ return userrole
+	 * @ exception 예외사항
+	 * @return
+	 */
+	public String getUserroleFromToken(String jwtString) throws Exception{
+		String userrole = getClaimsFromJwtToken(jwtString).get("userrole").toString();
+		return userrole;
+	}
+
 	@Override
 	public Claims getClaimsFromJwtToken(String jwtString) throws Exception{
 		return Jwts.parserBuilder().setSigningKey(secretKey).build().parseClaimsJws(jwtString).getBody();

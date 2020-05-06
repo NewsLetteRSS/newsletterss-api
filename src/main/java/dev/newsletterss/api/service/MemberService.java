@@ -35,8 +35,7 @@ public class MemberService implements UserDetailsService {
 	private final TokenStorageRepository tokenStorageRepository;
 	private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
-	@Autowired
-	JwtTokenUtilImpl jwtTokenUtilImpl;
+	private final JwtTokenUtilImpl jwtTokenUtilImpl;
 
 	/*
 	 * 회원가입
@@ -70,7 +69,7 @@ public class MemberService implements UserDetailsService {
 		TokenStorage tokenStorage = TokenStorage.builder()
 						.username(parseUserName)
 						.userrole(parseUserRole)
-						.tokenvalue(refreshToken)
+						.token(refreshToken)
 						.build();
 		tokenStorageRepository.save(tokenStorage);
 

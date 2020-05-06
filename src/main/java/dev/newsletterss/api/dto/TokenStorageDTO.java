@@ -21,20 +21,20 @@ public class TokenStorageDTO {
 
 	private String username;
 	private String userrole;
-	private String tokenvalue;
+	private String token;
 
 	public TokenStorage toEntity() {
 		return TokenStorage.builder()
 				.username(username)
 				.userrole(userrole)
-				.tokenvalue(tokenvalue)
+				.token(token)
 				.build();
 	}
 
 	@Builder
-	public TokenStorageDTO(String username, String userrole, String tokenvalue) {
+	public TokenStorageDTO(String username, String userrole, String token) {
 		this.username = username;
 		this.userrole = userrole;
-		this.tokenvalue = tokenvalue;
+		this.token = token;
 	}
 }

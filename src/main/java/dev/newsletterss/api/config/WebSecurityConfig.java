@@ -6,7 +6,6 @@ import dev.newsletterss.api.service.MemberService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
@@ -17,9 +16,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import lombok.AllArgsConstructor;
 import org.springframework.security.web.access.AccessDeniedHandler;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-
-import java.util.concurrent.atomic.AtomicIntegerArray;
 
 /**
  * Security Configuration
@@ -33,7 +29,8 @@ import java.util.concurrent.atomic.AtomicIntegerArray;
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 	@Autowired
 	private MemberService memberService;
-
+	@Autowired
+	public CustomTokenExceptionHandler customTokenExceptionHandler(){return new CustomTokenExceptionHandler();}
 	@Bean
 	public AccessDeniedHandler customAccessDeniedHandler(){
 		return new CustomAccessDeniedHandler();
@@ -61,13 +58,12 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 		// 아래 경로는 어떤 사용자건 접근이 가능하다
 		.authorizeRequests().antMatchers("/main", "/newsletterssAPI/user", "/login").permitAll()
 		// 아래의 경로는 인증을 받아야 접근 가능하다
-		.antMatchers(  "newsletterssAPI/auth/*").authenticated()
+		.antMatchers(  "newsletterssAPI/auth/**").authenticated()
 		.and()
 		.addFilter(new jwtAuthenticationFilter(authenticationManager(), getApplicationContext()))
-		.addFilter(new jwtAuthorizationFilter(authenticationManager(), getApplicationContext()))
-		//인증 관련 에러는 AuthenticationEntryPoint로, 인가 관련 에러는 customAccessDeniedHandler로 보내겠다
-		.exceptionHandling().accessDeniedHandler(customAccessDeniedHandler())
-		.authenticationEntryPoint(jwtAuthenticationEntryPoint)
+		.addFilter(new jwtAuthorizationFilter(authenticationManager(), getApplicationContext(), customTokenExceptionHandler()))
+		.exceptionHandling().accessDeniedHandler(customAccessDeniedHandler()).
+		authenticationEntryPoint(jwtAuthenticationEntryPoint)
 		.and()
 		//세션을 사용하지 않겠다
 		.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
