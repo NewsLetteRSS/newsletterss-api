@@ -1,4 +1,4 @@
-package dev.newsletterss.api.config;
+package dev.newsletterss.api.handler;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;

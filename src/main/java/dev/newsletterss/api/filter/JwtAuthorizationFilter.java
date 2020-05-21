@@ -1,10 +1,9 @@
 package dev.newsletterss.api.filter;
 
-import dev.newsletterss.api.config.CustomTokenExceptionHandler;
-import dev.newsletterss.api.config.JwtAuthenticationEntryPoint;
+import dev.newsletterss.api.handler.CustomTokenExceptionHandler;
 import dev.newsletterss.api.entity.TokenStorage;
 import dev.newsletterss.api.repository.TokenStorageRepository;
-import dev.newsletterss.api.service.JwtTokenUtilImpl;
+import dev.newsletterss.api.util.JwtTokenUtilImpl;
 import io.jsonwebtoken.JwtException;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -13,7 +12,6 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -35,7 +33,7 @@ import java.util.Optional;
  * (2020.04.05) 이상일, 최초 작성
  */
 @Slf4j
-public class jwtAuthorizationFilter extends BasicAuthenticationFilter {
+public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
 	@Autowired
 	private JwtTokenUtilImpl jwtTokenUtilImpl;
 	@Autowired
@@ -44,7 +42,7 @@ public class jwtAuthorizationFilter extends BasicAuthenticationFilter {
 	private final AuthenticationManager authenticationManager;
 	private final CustomTokenExceptionHandler customTokenExceptionHandler;
 
-	public jwtAuthorizationFilter(AuthenticationManager authenticationManager,
+	public JwtAuthorizationFilter(AuthenticationManager authenticationManager,
 								  ApplicationContext ctx,
 								  CustomTokenExceptionHandler customTokenExceptionHandler) {
 		super(authenticationManager);
@@ -70,6 +68,7 @@ public class jwtAuthorizationFilter extends BasicAuthenticationFilter {
 		//request Header에 token 값이 없는 경우 다음 filterChain으로 넘어간다
 		if (StringUtils.isEmpty(reqAccToekn) || StringUtils.isEmpty(reqRefToken)) {
 			chain.doFilter(request, response);
+			return;
 		}else {
 			try{
 				//accessToken parsing하기

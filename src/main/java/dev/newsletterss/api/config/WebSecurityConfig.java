@@ -1,7 +1,10 @@
 package dev.newsletterss.api.config;
 
-import dev.newsletterss.api.filter.jwtAuthenticationFilter;
-import dev.newsletterss.api.filter.jwtAuthorizationFilter;
+import dev.newsletterss.api.filter.JwtAuthenticationFilter;
+import dev.newsletterss.api.filter.JwtAuthorizationFilter;
+import dev.newsletterss.api.handler.CustomAccessDeniedHandler;
+import dev.newsletterss.api.handler.CustomTokenExceptionHandler;
+import dev.newsletterss.api.handler.JwtAuthenticationEntryPoint;
 import dev.newsletterss.api.service.MemberService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -49,7 +52,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 	@Override
 	public void configure(WebSecurity web) throws Exception {
 		// TODO Auto-generated method stub
-		web.ignoring().antMatchers("/css/**", "/js/**", "/img/**", "/lib/**");
+		web.ignoring().antMatchers("/css/**", "/js/**", "/img/**", "/lib/**",  "newsletterssAPI/rss/rssFeedTest");
 	}
 
 	@Override
@@ -60,8 +63,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 		// 아래의 경로는 인증을 받아야 접근 가능하다
 		.antMatchers(  "newsletterssAPI/auth/**").authenticated()
 		.and()
-		.addFilter(new jwtAuthenticationFilter(authenticationManager(), getApplicationContext()))
-		.addFilter(new jwtAuthorizationFilter(authenticationManager(), getApplicationContext(), customTokenExceptionHandler()))
+		.addFilter(new JwtAuthenticationFilter(authenticationManager(), getApplicationContext()))
+		.addFilter(new JwtAuthorizationFilter(authenticationManager(), getApplicationContext(), customTokenExceptionHandler()))
 		.exceptionHandling().accessDeniedHandler(customAccessDeniedHandler()).
 		authenticationEntryPoint(jwtAuthenticationEntryPoint)
 		.and()

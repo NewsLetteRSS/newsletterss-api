@@ -1,9 +1,12 @@
-package dev.newsletterss.api.config;
+package dev.newsletterss.api.handler;
 
+import io.jsonwebtoken.JwtException;
+import lombok.extern.java.Log;
 import org.json.simple.JSONObject;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
+import org.springframework.stereotype.Component;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -11,15 +14,17 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 
-public class CustomAuthenticationFailureHandler implements AuthenticationFailureHandler {
+@Component
+@Log
+public class CustomTokenExceptionHandler{
 
-    @Override
-    public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, AuthenticationException exception) throws IOException, ServletException {
+    public void onAuthenticationFailure(HttpServletRequest request, HttpServletResponse response, JwtException exception) throws IOException, ServletException {
         response.setStatus(HttpStatus.UNAUTHORIZED.value());
         response.setContentType("application/json;charset=utf-8");
         JSONObject json = new JSONObject();
-        String message = "잘못된 로그인 정보입니다.";
-        json.put("code", "888");
+        String message = "잘못된 접근입니다";
+        //exception 구분해서 code, message 다르게 보내기
+        json.put("code", "890");
         json.put("message", message);
 
         PrintWriter out = response.getWriter();

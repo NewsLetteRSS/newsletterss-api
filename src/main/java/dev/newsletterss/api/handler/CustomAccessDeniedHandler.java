@@ -1,4 +1,4 @@
-package dev.newsletterss.api.config;
+package dev.newsletterss.api.handler;
 
 import lombok.extern.slf4j.Slf4j;
 import org.json.simple.JSONObject;

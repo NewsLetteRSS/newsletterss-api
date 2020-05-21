@@ -16,7 +16,7 @@ import dev.newsletterss.api.entity.Member;
 import dev.newsletterss.api.entity.TokenStorage;
 import dev.newsletterss.api.repository.MemberRepository;
 import dev.newsletterss.api.repository.TokenStorageRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import dev.newsletterss.api.util.JwtTokenUtilImpl;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;

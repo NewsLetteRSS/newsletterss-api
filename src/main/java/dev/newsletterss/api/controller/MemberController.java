@@ -2,15 +2,10 @@ package dev.newsletterss.api.controller;
 
 import java.util.HashMap;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import dev.newsletterss.api.dto.MemberRequestDTO;
-import dev.newsletterss.api.service.JwtTokenUtilImpl;
 import dev.newsletterss.api.service.MemberService;
-import jdk.nashorn.internal.parser.JSONParser;
 import lombok.extern.java.Log;
-import org.json.JSONObject;
-import org.json.simple.JSONArray;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -35,7 +30,7 @@ public class MemberController {
 	@Autowired
 	private MemberService memberService;
 	
-	@PostMapping("/user")
+	@PostMapping("newsletterssAPI/user")
 	public ResponseEntity<?> saveUser(@RequestBody MemberRequestDTO memberRequestDto) throws Exception {
 		return ResponseEntity.ok(memberService.joinMember(memberRequestDto));
 	}
