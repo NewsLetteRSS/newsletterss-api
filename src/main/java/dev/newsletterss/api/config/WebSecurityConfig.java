@@ -52,7 +52,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 	@Override
 	public void configure(WebSecurity web) throws Exception {
 		// TODO Auto-generated method stub
-		web.ignoring().antMatchers("/css/**", "/js/**", "/img/**", "/lib/**",  "newsletterssAPI/rss/rssFeedTest");
+		web.ignoring().antMatchers("/css/**", "/js/**", "/img/**", "/lib/**");
 	}
 
 	@Override
@@ -61,7 +61,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 		// 아래 경로는 어떤 사용자건 접근이 가능하다
 		.authorizeRequests().antMatchers("/main", "/newsletterssAPI/user", "/login").permitAll()
 		// 아래의 경로는 인증을 받아야 접근 가능하다
-		.antMatchers(  "newsletterssAPI/auth/**").authenticated()
+		.antMatchers(  "newsletterssAPI/auth/**", "newsletterssAPI/rss/rssFeedTest").authenticated()
 		.and()
 		.addFilter(new JwtAuthenticationFilter(authenticationManager(), getApplicationContext()))
 		.addFilter(new JwtAuthorizationFilter(authenticationManager(), getApplicationContext(), customTokenExceptionHandler()))

@@ -6,14 +6,23 @@ package dev.newsletterss.api.service;
  * (2020.05.19) 이상일, 최초 작성
  */
 
-import com.sun.syndication.feed.synd.SyndEntry;
-import com.sun.syndication.feed.synd.SyndFeed;
+import com.sun.syndication.feed.synd.*;
 import com.sun.syndication.io.SyndFeedInput;
+import com.sun.syndication.io.SyndFeedOutput;
 import com.sun.syndication.io.XmlReader;
 import dev.newsletterss.api.entity.Rss;
 import dev.newsletterss.api.repository.FeedRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.java.Log;
+import org.jdom.Element;
+import org.json.JSONObject;
+import org.json.XML;
+import org.json.simple.JSONArray;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+
+import java.io.PrintWriter;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,6 +30,7 @@ import java.util.Optional;
 
 @RequiredArgsConstructor
 @Service
+@Log
 public class FeedService   {
 
 	private final FeedRepository feedRepository;
@@ -31,9 +41,10 @@ public class FeedService   {
 	 * @ param String reqCategory, String reqMedia 사용자가 선택한 카테고리
 	 * @ return List contents
 	 */
-	public List getFeedsBasedOnCategory(String reqMedia, String reqCategory) throws Exception{
+	public String getFeedsBasedOnCategory(String reqMedia, String reqCategory) throws Exception{
 		Optional<Rss> feedWrapper = feedRepository.findByMediaAndSubname(reqMedia, reqCategory);
-		List contents = getEntriesFromFeeds(feedWrapper);
+		//List contents = getEntriesFromFeeds(feedWrapper);
+		String contents = getEntriesFromFeeds(feedWrapper);
 		return contents;
 	}
 	/*
@@ -42,7 +53,7 @@ public class FeedService   {
 	 * @ param Optional<Rss> feedWrapper db에서 사용자의 카테고리 기준으로 가져온 rss 정보
 	 * @ return List getEntries
 	 */
-	public List getEntriesFromFeeds(Optional<Rss> feedWrapper) throws Exception{
+	public String getEntriesFromFeeds(Optional<Rss> feedWrapper) throws Exception{
 		Rss feeds = feedWrapper.get();
 		URL feedSource = new URL(feeds.getFeedUrl());
 		SyndFeedInput input = new SyndFeedInput();
@@ -50,11 +61,15 @@ public class FeedService   {
 
 		ArrayList list = new ArrayList();
 
-		for(int i = 0; i < feed.getEntries().size(); i++) {
-			SyndEntry entry = (SyndEntry) feed.getEntries().get(i);
-			list.add(entry);
-		}
-		return list;
+		List entry = feed.getEntries();
+		list.addAll(entry);
+		SyndFeedOutput output = new SyndFeedOutput();
+		output.output(feed, new PrintWriter(System.out));
+
+		JSONObject json = XML.toJSONObject(output.outputString(feed));
+		String jsonString = json.toString();
+
+		return jsonString;
 	}
 
 
