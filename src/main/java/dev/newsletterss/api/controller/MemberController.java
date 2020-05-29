@@ -30,12 +30,12 @@ public class MemberController {
 	@Autowired
 	private MemberService memberService;
 	
-	@PostMapping("newsletterssAPI/user")
+	@PostMapping("/user")
 	public ResponseEntity<?> saveUser(@RequestBody MemberRequestDTO memberRequestDto) throws Exception {
 		return ResponseEntity.ok(memberService.joinMember(memberRequestDto));
 	}
 
-	@PostMapping("newsletterssAPI/auth/login")
+	@PostMapping("/auth/login")
 	public ResponseEntity<?> authlogin(HttpServletResponse response) throws Exception {
 		HashMap<String, Object> result = new HashMap<>();
 		result.put("accessToken", response.getHeader("accessToken"));
@@ -43,8 +43,9 @@ public class MemberController {
 		memberService.saveRefreshTokenInMaria(response.getHeader("refreshToken"));
 		return new ResponseEntity<>(result, HttpStatus.OK);
 	}
-	@PostMapping("newsletterssAPI/auth/authorization")
-	public void authorizationRequestTest() throws Exception {
+	@PostMapping("/auth/authorization")
+	public ResponseEntity<?>  authorizationRequestTest() throws Exception {
 		log.info("----------------------인가 성공-----------------------");
+		return new ResponseEntity<>("토큰 검증 통과", HttpStatus.OK);
 	}
 }

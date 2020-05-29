@@ -90,12 +90,12 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
 				}
 				//token parsing한 값으로 authentication 객체 만들기
 				auth = new UsernamePasswordAuthenticationToken(usernamefromToken, null, authorities);
+				SecurityContextHolder.getContext().setAuthentication(auth);
 				chain.doFilter(request, response);
 				} catch (JwtException e) { // token 값으로 Authentication 객체를 생성하기 때문에 JwtExcption 선언
 					customTokenExceptionHandler.onAuthenticationFailure(request, response, e);
 				}
 			}
-		SecurityContextHolder.getContext().setAuthentication(auth);
 	}
 
 	private boolean compareRequestTokenWithDb(HttpServletRequest request){

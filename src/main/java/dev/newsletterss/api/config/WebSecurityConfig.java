@@ -59,9 +59,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 	protected void configure(HttpSecurity http) throws Exception {
 		http.csrf().disable()
 		// 아래 경로는 어떤 사용자건 접근이 가능하다
-		.authorizeRequests().antMatchers("/main", "/newsletterssAPI/user", "/login").permitAll()
+		.authorizeRequests().antMatchers("/main", "/user", "/login").permitAll()
 		// 아래의 경로는 인증을 받아야 접근 가능하다
-		.antMatchers(  "newsletterssAPI/auth/**", "newsletterssAPI/rss/rssFeedTest").authenticated()
+		.antMatchers(  "/auth/**").authenticated()
 		.and()
 		.addFilter(new JwtAuthenticationFilter(authenticationManager(), getApplicationContext()))
 		.addFilter(new JwtAuthorizationFilter(authenticationManager(), getApplicationContext(), customTokenExceptionHandler()))

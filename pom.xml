@@ -12,7 +12,7 @@
 	<groupId>dev.newsletterss</groupId>
 	<artifactId>newsletterss-api</artifactId>
 	<version>0.0.1</version>
-	<packaging>war</packaging>
+	<packaging>jar</packaging>
 	<name>newsletterss-api</name>
 	<description>NewsLetteRSS API</description>
 

@@ -46,7 +46,7 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 		this.authenticationManager = authenticationManager;
 		//인증처리 실패 처리를 위한 CustomAuthenticationFailureHandler 등록
 		this.setAuthenticationFailureHandler(new CustomAuthenticationFailureHandler());
-		setFilterProcessesUrl("/newsletterssAPI/auth/login");
+		setFilterProcessesUrl("/auth/login");
 		jwtTokenUtilImpl = ctx.getBean(JwtTokenUtilImpl.class);
 	}
 

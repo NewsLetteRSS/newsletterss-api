@@ -1,3 +1,6 @@
+server:
+  servlet:
+    context-path: /newsletterssAPI
 spring:
   datasource:
     driver-class-name: org.mariadb.jdbc.Driver
