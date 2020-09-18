@@ -83,7 +83,6 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 		SecurityContext context = SecurityContextHolder.createEmptyContext();
 		context.setAuthentication(authResult);
 		SecurityContextHolder.setContext(context);
-
 		chain.doFilter(request, response);
 
 	}

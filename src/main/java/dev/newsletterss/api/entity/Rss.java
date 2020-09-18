@@ -35,19 +35,25 @@ public class Rss {
     @Column(name = "url")
     private String feedUrl;
     @Column(name = "regDate")
-    private LocalDateTime regDate;
+    private LocalDateTime reg_date;
     @Column(name = "updateDate")
-    private LocalDateTime updateDate;
+    private LocalDateTime update_date;
+    @Column(name = "media")
+    private String media;
+    @Column(name = "subname")
+    private String subname;
 
     @Builder
     public Rss(String feedCode, String feedCategory, String feedName, String feedType, String feedUrl
-    , LocalDateTime regDate, LocalDateTime updateDate ){
+    , LocalDateTime reg_date, LocalDateTime update_date, String media, String subname){
         this.feedCode = feedCode;
         this.feedCategory = feedCategory;
         this.feedName = feedName;
         this.feedType = feedType;
         this.feedUrl = feedUrl;
-        this.regDate = regDate;
-        this.updateDate = updateDate;
+        this.reg_date = reg_date;
+        this.update_date = update_date;
+        this.media = media;
+        this.subname = subname;
     }
 }

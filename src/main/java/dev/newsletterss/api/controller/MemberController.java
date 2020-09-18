@@ -1,6 +1,7 @@
 package dev.newsletterss.api.controller;
 
 import java.util.HashMap;
+
 import javax.servlet.http.HttpServletResponse;
 import dev.newsletterss.api.dto.MemberRequestDTO;
 import dev.newsletterss.api.service.MemberService;
