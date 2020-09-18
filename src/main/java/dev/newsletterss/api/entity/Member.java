@@ -1,9 +1,12 @@
 package dev.newsletterss.api.entity;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 import javax.persistence.*;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
@@ -34,7 +37,11 @@ public class Member {
 	private LocalDateTime regdate;
 	@Column(name = "userRole")
 	private String userrole;
-	
+
+	@OneToMany(mappedBy = "member") // Member 입장에서는 Subscription과 1:N 관계
+	@JsonManagedReference
+	private List<Subscription> subsList = new ArrayList<>();
+
 	@Builder
 	public Member( String username, String password, String email, LocalDateTime regdate, String userrole) {
 		this.username = username;

@@ -4,8 +4,10 @@ package dev.newsletterss.api.service;
  * @author 이상일
  * @version 1.0
  * (2020.05.19) 이상일, 최초 작성
+ * (2020.07.27) 이상일, 사용자 선택 Feed contents, 전체 rss 목록 조회 서비스 추가
  */
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.syndication.feed.synd.*;
 import com.sun.syndication.io.SyndFeedInput;
 import com.sun.syndication.io.SyndFeedOutput;
@@ -14,16 +16,12 @@ import dev.newsletterss.api.entity.Rss;
 import dev.newsletterss.api.repository.FeedRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
-import org.jdom.Element;
 import org.json.JSONObject;
 import org.json.XML;
-import org.json.simple.JSONArray;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-
 import java.io.PrintWriter;
 import java.net.URL;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -36,14 +34,26 @@ public class FeedService   {
 	private final FeedRepository feedRepository;
 
 	/*
-	 * 카테고리 기준 rss
+	 * 전체 Rss 목록 조회
 	 *
-	 * @ param String reqCategory, String reqMedia 사용자가 선택한 카테고리
+	 * @ param rssFeedNm feedName
 	 * @ return List contents
 	 */
-	public String getFeedsBasedOnCategory(String reqMedia, String reqCategory) throws Exception{
-		Optional<Rss> feedWrapper = feedRepository.findByMediaAndSubname(reqMedia, reqCategory);
-		//List contents = getEntriesFromFeeds(feedWrapper);
+	public String getTotalRssFeeds() throws Exception{
+		ObjectMapper objMapper = new ObjectMapper();
+		List<Rss> list = feedRepository.findAll();
+		String totalRss = objMapper.writeValueAsString(list);
+		return totalRss;
+	}
+
+	/*
+	 * 특정 rssFeed 목록 조회
+	 *
+	 * @ param rssFeedNm 사용자가 선택한 rssFeed 이름
+	 * @ return List contents
+	 */
+	public String getFeedsBasedOnName(String rssFeedNm) throws Exception{
+		Optional<Rss> feedWrapper = feedRepository.findByfeedName(rssFeedNm);
 		String contents = getEntriesFromFeeds(feedWrapper);
 		return contents;
 	}
@@ -66,7 +76,8 @@ public class FeedService   {
 		SyndFeedOutput output = new SyndFeedOutput();
 		output.output(feed, new PrintWriter(System.out));
 
-		JSONObject json = XML.toJSONObject(output.outputString(feed));
+		JSONObject json;
+		json = XML.toJSONObject(output.outputString(feed));
 		String jsonString = json.toString();
 
 		return jsonString;

@@ -23,10 +23,8 @@ public class FeedRequestDTO {
 	private String feedName;
 	private String feedType;
 	private String feedUrl;
-	private LocalDateTime reg_date;
-	private LocalDateTime update_date;
-	private String media;
-	private String subname;
+	private LocalDateTime regDate;
+	private LocalDateTime updateDate;
 
 	public Rss toEntity() {
 		return Rss.builder()
@@ -35,24 +33,20 @@ public class FeedRequestDTO {
 				.feedName(feedName)
 				.feedType(feedType)
 				.feedUrl(feedUrl)
-				.reg_date(reg_date)
-				.update_date(update_date)
-				.media(media)
-				.subname(subname)
+				.regDate(regDate)
+				.updateDate(updateDate)
 				.build();
 	}
 
 	@Builder
 	public FeedRequestDTO(String feedCode, String feedCategory, String feedName, String feedType, String feedUrl
-			, LocalDateTime reg_date, LocalDateTime update_date, String media, String subname) {
+			, LocalDateTime regDate, LocalDateTime updateDate) {
 		this.feedCode = feedCode;
 		this.feedCategory = feedCategory;
 		this.feedName = feedName;
 		this.feedType = feedType;
 		this.feedUrl = feedUrl;
-		this.reg_date = reg_date;
-		this.update_date = update_date;
-		this.media = media;
-		this.subname = subname;
+		this.regDate = regDate;
+		this.updateDate = updateDate;
 	}
 }
